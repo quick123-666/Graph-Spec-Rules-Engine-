@@ -1,6 +1,12 @@
-# 数据文件（太大）
+# 数据文件
 *.txt
-*.json
+raw_text.txt
+chunks_text.txt
+
+# 大文件（不跟踪）
+data.json
+evolution-detail.json
+raw_text.txt
 
 # IDE
 .vscode/

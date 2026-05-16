@@ -1,0 +1,1446 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>技术演化详情 - GraphSpec</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+               background: #0f1419; color: #e6e6e6; padding: 2rem; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 { color: #4ade80; margin-bottom: 0.5rem; }
+        
+        .selector { margin-bottom: 2rem; }
+        .selector label { color: #888; margin-right: 1rem; }
+        .selector select { background: #1a2332; color: #e6e6e6; border: 1px solid #333;
+                          padding: 0.5rem 1rem; border-radius: 6px; font-size: 1rem; min-width: 300px; }
+        
+        .tech-header { background: linear-gradient(135deg, #1a2332, #0f1419);
+                       border-radius: 12px; padding: 2rem; margin-bottom: 2rem; border: 1px solid #2d3748; }
+        .tech-name { font-size: 2rem; font-weight: 700; color: #4ade80; margin-bottom: 0.5rem; }
+        .tech-meta { color: #888; font-size: 0.9rem; }
+        .tech-stats { display: flex; gap: 2rem; margin-top: 1.5rem; }
+        .tech-stat { text-align: center; }
+        .tech-stat-value { font-size: 1.5rem; color: #4ade80; font-weight: bold; }
+        .tech-stat-label { color: #666; font-size: 0.8rem; }
+
+        .timeline-container { background: #1a2332; border-radius: 12px; padding: 2rem; margin-bottom: 2rem; }
+        .timeline-title { color: #4ade80; font-size: 1.25rem; margin-bottom: 1.5rem; }
+        
+        .stage-card { display: flex; align-items: stretch; margin-bottom: 1.5rem; }
+        .stage-marker { width: 120px; display: flex; flex-direction: column; align-items: center; padding-right: 1.5rem; }
+        .stage-dot { width: 20px; height: 20px; border-radius: 50%; background: #4ade80; flex-shrink: 0; }
+        .stage-dot.explore { background: #60a5fa; }
+        .stage-dot.design { background: #a78bfa; }
+        .stage-dot.implement { background: #4ade80; }
+        .stage-dot.optimize { background: #f59e0b; }
+        .stage-dot.mature { background: #10b981; }
+        .stage-line { width: 2px; flex: 1; background: #333; margin-top: 8px; }
+        .stage-version { font-size: 0.8rem; color: #888; margin-top: 0.5rem; text-align: center; }
+        
+        .stage-content { flex: 1; background: #0f1419; border-radius: 8px; padding: 1.25rem; border: 1px solid #2d3748; }
+        .stage-title { font-size: 1.1rem; font-weight: 600; color: #fff; margin-bottom: 0.5rem; }
+        .stage-time { font-size: 0.8rem; color: #666; margin-bottom: 1rem; }
+        
+        .problems-section { margin-top: 1rem; }
+        .problems-title { color: #888; font-size: 0.875rem; margin-bottom: 0.75rem; }
+        .problem-item { background: #1a2332; border-radius: 6px; padding: 0.875rem; margin-bottom: 0.5rem; border-left: 3px solid #4ade80; }
+        .problem-item.resolved { border-left-color: #10b981; }
+        .problem-item.open { border-left-color: #f59e0b; }
+        .problem-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+        .problem-priority { font-size: 0.75rem; padding: 0.2rem 0.5rem; border-radius: 4px; background: #333; color: #888; }
+        .problem-status { font-size: 0.75rem; padding: 0.2rem 0.5rem; border-radius: 4px; }
+        .problem-status.resolved { background: #065f46; color: #10b981; }
+        .problem-status.open { background: #78350f; color: #f59e0b; }
+        .problem-title { font-size: 0.9rem; color: #e6e6e6; }
+        .problem-times { font-size: 0.75rem; color: #666; margin-top: 0.5rem; display: flex; gap: 1rem; }
+        .problem-desc { font-size: 0.8rem; color: #888; margin-top: 0.5rem; line-height: 1.5; }
+        
+        .mermaid-diagram { background: #0f1419; border-radius: 8px; padding: 1.5rem; margin-top: 1rem; }
+        
+        .empty-state { text-align: center; padding: 3rem; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔬 技术演化详情</h1>
+        <p class="subtitle" style="color:#888;margin-bottom:2rem;">GraphSpec Rules Engine - 单技术深度演化追踪</p>
+
+        <div class="selector">
+            <label for="topic-select">选择技术主题：</label>
+            <select id="topic-select" onchange="loadTopic(this.value)">
+                <option value="">-- 请选择 --</option>
+                <option value="agent-framework">agent-framework (15 problems)</option>
+                <option value="cursor-ide">cursor-ide (8 problems)</option>
+                <option value="fts-search-mode">fts-search-mode (9 problems)</option>
+                <option value="github-success">github-success (18 problems)</option>
+                <option value="knowledge-graph-auto-update">knowledge-graph-auto-update (4 problems)</option>
+                <option value="mcp-protocol">mcp-protocol (8 problems)</option>
+                <option value="report-standard">report-standard (26 problems)</option>
+                <option value="self-improving-agent">self-improving-agent (7 problems)</option>
+                <option value="triple-extractor">triple-extractor (5 problems)</option>
+                <option value="图谱规范开发">图谱规范开发 (18 problems)</option>
+            </select>
+        </div>
+
+        <div id="content">
+            <div class="empty-state">
+                <p>请选择上方技术主题查看详细演化过程</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const TOPICS_DATA = {
+  "agent-framework": {
+    "versions": [
+      {
+        "version": "v1",
+        "stage": "explore",
+        "title": "agent-framework 探索阶段",
+        "start_at": "2026-05-16 19:19:57",
+        "end_at": null,
+        "status": "open"
+      },
+      {
+        "version": "v2",
+        "stage": "design",
+        "title": "agent-framework 设计阶段",
+        "start_at": "2026-05-16 19:20:20",
+        "end_at": null,
+        "status": "open"
+      },
+      {
+        "version": "v3",
+        "stage": "implement",
+        "title": "agent-framework 实现阶段",
+        "start_at": "2026-05-16 19:20:20",
+        "end_at": null,
+        "status": "open"
+      }
+    ],
+    "problems": [
+      {
+        "problem_title": "agent-framework 问题",
+        "problem_description": "n8n\t187,909\t可视化工作流自动化 + AI\t工作流构建平台\ndaytona\t72,442\tAI Agent 安全沙箱 + 弹性扩展\t基础设施层   安装这个两个",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-15T18:50:39.807778",
+        "resolved_at": "2026-05-16 16:31:25"
+      },
+      {
+        "problem_title": "agent-framework 问题",
+        "problem_description": "先看 LLM-Agent-Paper-List 的综述论文\n再看 Prompt-Engineering-Guide 理解基础技术\n最后 根据需求研究 MetaGPT/AutoGen/CrewAI 框架",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-15T19:00:51.983563",
+        "resolved_at": "2026-05-16 16:31:25"
+      },
+      {
+        "problem_title": "agent-framework 问题",
+        "problem_description": "研究 Self-improving Agent 领域，聚焦 Hermes Agent 和 MemOS。收集：1) 官方文档 2) 自我改进机制 3) skill 创建流程 4) 架构设计 5) 与其他框架对比。整理成深度研究报告，约500字。",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-15T21:33:36.488292",
+        "resolved_at": "2026-05-16 16:31:25"
+      },
+      {
+        "problem_title": "agent-framework 问题",
+        "problem_description": "研究 Multi-Agent Systems (多智能体系统)，收集：1) 核心概念 2) 协作机制 3) 通信协议 4) 知名项目(MetaGPT等) 5) 应用场景。整理成深度研究报告，约500字。",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-15T21:35:00.685364",
+        "resolved_at": "2026-05-16 16:31:25"
+      },
+      {
+        "problem_title": "agent-framework 问题",
+        "problem_description": "研究 Coding Agent 生态，重点 Cursor IDE 和 agent-skills-hub。收集：1) 官方文档 2) 核心功能 3) AI 编程能力 4) 生态插件 5) 市场现状。整理成深度研究报告，约500字。",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-15T21:36:24.459522",
+        "resolved_at": "2026-05-16 16:31:25"
+      },
+      {
+        "problem_title": "agent-framework 问题",
+        "problem_description": "AI Agent 工具协议\tMCP (Anthropic)\t-\t统一协议，AI Agent 工具调用标准\n自进化 Agent\tHermes Agent, MemOS\t150K+\tAgent 能从经验中学习、创建 skill\n工作流自动化 + AI\tn8n\t187K\t工作流编排 + AI 能力\n持久上",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-15T22:12:03.560801",
+        "resolved_at": "2026-05-16 16:31:25"
+      },
+      {
+        "problem_title": "agent-framework 相关问题追踪",
+        "problem_description": null,
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16 16:31:25",
+        "resolved_at": "2026-05-16T19:05:52.033469"
+      },
+      {
+        "problem_title": "agent-framework 问题",
+        "problem_description": "深度研究 /c/Users/Administrator/workspace/spec-kit 仓库，输出：\n1. 项目架构和核心文件\n2. 核心功能和工作流\n3. 主要文件和模块的用途\n4. 关键设计模式\n5. AI编码agent集成方式\n6. 主要亮点和特点\n\n请仔细阅读README.md和主要源",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T10:03:03.133841",
+        "resolved_at": "2026-05-16 16:31:25"
+      },
+      {
+        "problem_title": "agent-framework 问题",
+        "problem_description": "深度研究 Self-improving Agent（自改进 Agent）领域，找出：\n1. 核心定义和技术原理\n2. 主流开源实现（GitHub 项目）\n3. 关键论文和研究\n4. 最佳实践\n\n返回完整研究报告。",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T12:27:10.640404",
+        "resolved_at": "2026-05-16 16:31:25"
+      },
+      {
+        "problem_title": "agent-framework 问题",
+        "problem_description": "深度研究 AI Agent 框架领域：\n1. 主流框架对比（LangChain, LlamaIndex, AutoGen, MetaGPT, CrewAI等）\n2. 核心架构和特性\n3. GitHub Stars 和社区\n4. 适用场景\n5. 选择指南\n\n返回完整研究报告。",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T12:29:08.826931",
+        "resolved_at": "2026-05-16 16:31:25"
+      },
+      {
+        "problem_title": "agent-framework 问题",
+        "problem_description": "从以下文本数据中抽取知识图谱实体（人、公司、项目、框架、工具、概念等）。\n\n数据包括：\n- Self-improving Agent 研究\n- GitHub 成功模式分析\n- Cursor IDE 分析\n- MCP Protocol 研究\n- Agent 框架对比\n\n请抽取所有实体，返回 JSON ",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T13:08:53.419751",
+        "resolved_at": "2026-05-16 16:31:25"
+      },
+      {
+        "problem_title": "agent-framework 问题",
+        "problem_description": "从以下 chunk 数据中抽取知识图谱实体。\n\n这些 chunks 包含各种技术文档片段，包括：\n- AI Agent 相关技术\n- 编程框架和工具\n- 开源项目信息\n- 技术概念和术语\n\n请抽取所有实体，返回 JSON 数组格式。每个实体包含：id, name, type_category, ty",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T13:08:59.518327",
+        "resolved_at": "2026-05-16 16:31:25"
+      },
+      {
+        "problem_title": "agent-framework 问题",
+        "problem_description": "从以下文本中抽取知识图谱三元组（实体关系对）。\n\n数据包括：\n- Self-improving Agent 研究\n- GitHub 成功模式分析\n- Cursor IDE 分析\n- MCP Protocol 研究\n- Agent 框架对比\n\n请抽取三元组，返回 JSON 数组格式。每条三元组包含：i",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T13:09:09.370721",
+        "resolved_at": "2026-05-16 16:31:25"
+      },
+      {
+        "problem_title": "agent-framework 问题",
+        "problem_description": "[CONTEXT COMPACTION — REFERENCE ONLY] Earlier turns were compacted into the summary below. This is a handoff from a previous context window — treat it",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T13:49:04.269866",
+        "resolved_at": "2026-05-16 16:31:25"
+      },
+      {
+        "problem_title": "agent-framework 问题",
+        "problem_description": "从 facts 表抽取三元组写入 kg_triples 表。先处理50条测试质量，最终目标是处理全部714条。\n\n数据库路径: C:/Users/Administrator/Desktop/kuakegongxxiang/askdb/data/knowledge.db\n\nkg_triples 表结构",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T14:05:16.923653",
+        "resolved_at": "2026-05-16 16:31:25"
+      }
+    ],
+    "reports": [
+      {
+        "report_id": "f9f6dbaf-88bc-4185-bd5b-d380451bc3b0",
+        "title": "Agent Framework 深度研究报告：大模型 Agent 开发框架全景分析",
+        "created_at": "2026-05-16 16:31:25",
+        "content_preview": "## 一、问题背景（为什么会出现这个技术/概念）  ### 传统 Agent 开发的三大痛点  在大语言模型（LLM）爆发之前，构建一个\"智能代理\"（Agent）是一件极其复杂且门槛极高的事情。传统 Agent 开发面临三个核心痛点：  **1. 工具调用（Tool Calling）的碎片化**  当开发者想让 LLM 调用外部工具（如搜索 API、数据库查询、计算器）时，必须自己实现一整套工具注"
+      }
+    ]
+  },
+  "cursor-ide": {
+    "versions": [
+      {
+        "version": "v1",
+        "stage": "explore",
+        "title": "cursor-ide 探索阶段",
+        "start_at": "2026-05-16 19:23:41",
+        "end_at": null,
+        "status": "open"
+      },
+      {
+        "version": "v2",
+        "stage": "design",
+        "title": "cursor-ide 设计阶段",
+        "start_at": "2026-05-16 19:23:41",
+        "end_at": null,
+        "status": "open"
+      },
+      {
+        "version": "v3",
+        "stage": "implement",
+        "title": "cursor-ide 实现阶段",
+        "start_at": "2026-05-16 19:23:41",
+        "end_at": null,
+        "status": "open"
+      }
+    ],
+    "problems": [
+      {
+        "problem_title": "cursor-ide 问题",
+        "problem_description": "研究 Coding Agent 生态，重点 Cursor IDE 和 agent-skills-hub。收集：1) 官方文档 2) 核心功能 3) AI 编程能力 4) 生态插件 5) 市场现状。整理成深度研究报告，约500字。",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-15T21:36:24.459522",
+        "resolved_at": "2026-05-16 12:31:12"
+      },
+      {
+        "problem_title": "cursor-ide 问题",
+        "problem_description": "AI Agent 工具协议\tMCP (Anthropic)\t-\t统一协议，AI Agent 工具调用标准\n自进化 Agent\tHermes Agent, MemOS\t150K+\tAgent 能从经验中学习、创建 skill\n工作流自动化 + AI\tn8n\t187K\t工作流编排 + AI 能力\n持久上",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-15T22:12:03.560801",
+        "resolved_at": "2026-05-16 12:31:12"
+      },
+      {
+        "problem_title": "cursor-ide 相关问题追踪",
+        "problem_description": null,
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16 12:31:12",
+        "resolved_at": "2026-05-16T19:05:52.033469"
+      },
+      {
+        "problem_title": "cursor-ide 问题",
+        "problem_description": "深度研究 Cursor IDE 领域，找出：\n1. 核心功能和技术实现\n2. AI 代码编辑器的技术架构\n3. 关键交互设计（CMD+K 等）\n4. 与竞品的差异化分析\n5. 代表性项目和论文\n\n返回完整研究报告。",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T12:28:33.846518",
+        "resolved_at": "2026-05-16 12:31:12"
+      },
+      {
+        "problem_title": "cursor-ide 问题",
+        "problem_description": "从以下文本数据中抽取知识图谱实体（人、公司、项目、框架、工具、概念等）。\n\n数据包括：\n- Self-improving Agent 研究\n- GitHub 成功模式分析\n- Cursor IDE 分析\n- MCP Protocol 研究\n- Agent 框架对比\n\n请抽取所有实体，返回 JSON ",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T13:08:53.419751",
+        "resolved_at": "2026-05-16 12:31:12"
+      },
+      {
+        "problem_title": "cursor-ide 问题",
+        "problem_description": "从以下文本中抽取知识图谱三元组（实体关系对）。\n\n数据包括：\n- Self-improving Agent 研究\n- GitHub 成功模式分析\n- Cursor IDE 分析\n- MCP Protocol 研究\n- Agent 框架对比\n\n请抽取三元组，返回 JSON 数组格式。每条三元组包含：i",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T13:09:09.370721",
+        "resolved_at": "2026-05-16 12:31:12"
+      },
+      {
+        "problem_title": "cursor-ide 问题",
+        "problem_description": "[CONTEXT COMPACTION — REFERENCE ONLY] Earlier turns were compacted into the summary below. This is a handoff from a previous context window — treat it",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T13:49:04.269866",
+        "resolved_at": "2026-05-16 12:31:12"
+      },
+      {
+        "problem_title": "cursor-ide 问题",
+        "problem_description": "从 facts 表抽取三元组写入 kg_triples 表。先处理50条测试质量，最终目标是处理全部714条。\n\n数据库路径: C:/Users/Administrator/Desktop/kuakegongxxiang/askdb/data/knowledge.db\n\nkg_triples 表结构",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T14:05:16.923653",
+        "resolved_at": "2026-05-16 12:31:12"
+      }
+    ],
+    "reports": [
+      {
+        "report_id": "report_26d315c3d0a8",
+        "title": "Cursor IDE 深度研究报告",
+        "created_at": "2026-05-16 12:31:12",
+        "content_preview": "# Cursor IDE 深度研究报告  ## 一、项目概述  **Cursor** 是首个 AI-first 代码编辑器，基于 VS Code 打造，专注于 AI 辅助编程。  | 指标 | 数据 | |------|------| | GitHub Stars | 15k+ | | 创立时间 | 2023 年 | | 创始人 | Michael Truell 等 | | 技术栈 | Elect"
+      },
+      {
+        "report_id": "rpt_f501b70586e3",
+        "title": "Cursor IDE：AI原生编辑器的革命与实践",
+        "created_at": "2026-05-16 14:40:13",
+        "content_preview": "## 一、问题背景（为什么会出现这个技术/概念）  ### 1.1 痛点：传统IDE与AI时代的脱节  在Cursor IDE出现之前，传统IDE面临以下核心痛点：  | 痛点类型 | 具体表现 | 负面影响 | |---------|---------|---------| | **上下文割裂** | AI模型无法感知完整项目上下文 | 生成代码质量差、不可用 | | **交互迟缓** | AI"
+      }
+    ]
+  },
+  "fts-search-mode": {
+    "versions": [
+      {
+        "version": "v1",
+        "stage": "explore",
+        "title": "fts-search-mode 探索阶段",
+        "start_at": "2026-05-16 19:23:41",
+        "end_at": null,
+        "status": "open"
+      },
+      {
+        "version": "v2",
+        "stage": "design",
+        "title": "fts-search-mode 设计阶段",
+        "start_at": "2026-05-16 19:23:41",
+        "end_at": null,
+        "status": "open"
+      },
+      {
+        "version": "v3",
+        "stage": "implement",
+        "title": "fts-search-mode 实现阶段",
+        "start_at": "2026-05-16 19:23:41",
+        "end_at": null,
+        "status": "open"
+      }
+    ],
+    "problems": [
+      {
+        "problem_title": "fts-search-mode 问题",
+        "problem_description": "现在已经有了会话压缩，这个只需要保存报告，也就是不需要什么都写进去，不过要把时间/会话/讨论什么问题/什么项目/与github是否有关/与之前的哪些讨论有关/与之前的哪些项目有关  说清楚，在加上3条新思考",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-15T22:54:07.015178",
+        "resolved_at": "2026-05-16T16:30:49.605180"
+      },
+      {
+        "problem_title": "fts-search-mode 问题",
+        "problem_description": "在 GitHub 上搜索脑图（brain-map/mind-map）和知识图谱（knowledge-graph）相关的热门项目，研究它们的架构和特点。\n\n要求：\n1. 搜索关键词：brain-map、mind-map、knowledge-graph、graph-visualization 相关项目\n",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T11:04:25.877244",
+        "resolved_at": "2026-05-16T16:30:49.605180"
+      },
+      {
+        "problem_title": "fts-search-mode 问题",
+        "problem_description": "搜索 GitHub 上流行的知识图谱（Knowledge Graph）可视化项目，列出前10名：star数、项目名、描述、技术栈、主要特性。中文回复。",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T12:08:35.656076",
+        "resolved_at": "2026-05-16T16:30:49.605180"
+      },
+      {
+        "problem_title": "fts-search-mode 问题",
+        "problem_description": "搜索GitHub上关于知识图谱(Knowledge Graph)的优秀项目、论文和教程。返回10-15个有代表性的仓库，包含名称、star数、简介和链接。",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T12:24:12.381448",
+        "resolved_at": "2026-05-16T16:30:49.605180"
+      },
+      {
+        "problem_title": "fts-search-mode 问题",
+        "problem_description": "搜索知识图谱(Knowledge Graph)领域的经典论文和最新研究。返回10-15篇有代表性的论文，包含标题、作者、年份、引用数、核心贡献和链接。",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T12:24:32.522451",
+        "resolved_at": "2026-05-16T16:30:49.605180"
+      },
+      {
+        "problem_title": "fts-search-mode 问题",
+        "problem_description": "100TB 真实场景下图谱搜索要花多少时间",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T13:27:27.560694",
+        "resolved_at": "2026-05-16T16:30:49.605180"
+      },
+      {
+        "problem_title": "fts-search-mode 问题",
+        "problem_description": "[CONTEXT COMPACTION — REFERENCE ONLY] Earlier turns were compacted into the summary below. This is a handoff from a previous context window — treat it",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T13:49:04.269866",
+        "resolved_at": "2026-05-16T16:30:49.605180"
+      },
+      {
+        "problem_title": "fts-search-mode 问题",
+        "problem_description": "会话压缩先不要压缩，会话压缩之后搜索出问题了，你研究一下",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T14:16:01.291826",
+        "resolved_at": "2026-05-16T16:30:49.605180"
+      },
+      {
+        "problem_title": "fts-search-mode 相关问题追踪",
+        "problem_description": null,
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T16:30:49.605180",
+        "resolved_at": "2026-05-16T19:05:52.033469"
+      }
+    ],
+    "reports": [
+      {
+        "report_id": "fts-search-mode-20260516163049",
+        "title": "Hermes state.db 搜索模式深度解析",
+        "created_at": "2026-05-16T16:30:49.605180",
+        "content_preview": "# Hermes state.db 搜索模式深度解析  ## 一、有什么问题  ### 1.1 问题现象  2026-05-16 用户反馈：`session_search` 工具搜索结果与预期不符。  具体表现： - 搜索 `知识图谱`：FTS 返回 12 条，LIKE 返回 128 条，**差异巨大** - 搜索 `GitHub`：FTS 返回 846 条，LIKE 返回 945 条，遗漏约 1"
+      }
+    ]
+  },
+  "github-success": {
+    "versions": [
+      {
+        "version": "v1",
+        "stage": "explore",
+        "title": "github-success 探索阶段",
+        "start_at": "2026-05-16 19:23:41",
+        "end_at": null,
+        "status": "open"
+      },
+      {
+        "version": "v2",
+        "stage": "design",
+        "title": "github-success 设计阶段",
+        "start_at": "2026-05-16 19:23:41",
+        "end_at": null,
+        "status": "open"
+      },
+      {
+        "version": "v3",
+        "stage": "implement",
+        "title": "github-success 实现阶段",
+        "start_at": "2026-05-16 19:23:41",
+        "end_at": null,
+        "status": "open"
+      }
+    ],
+    "problems": [
+      {
+        "problem_title": "github-success 问题",
+        "problem_description": "现在github上比较新潮的编程理念是什么",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-15T22:12:03.560801",
+        "resolved_at": "2026-05-16 12:31:12"
+      },
+      {
+        "problem_title": "github-success 问题",
+        "problem_description": "Search GitHub for diagram-driven project tools - tools where you create a visual diagram first and it builds the project step by step with real-time s",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-15T22:14:48.782265",
+        "resolved_at": "2026-05-16 12:31:12"
+      },
+      {
+        "problem_title": "github-success 问题",
+        "problem_description": "Search for tools that: 1) Let you draw/create a visual diagram first, 2) Automatically build/builds the project from that diagram, 3) Every step is re",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-15T22:24:55.264707",
+        "resolved_at": "2026-05-16 12:31:12"
+      },
+      {
+        "problem_title": "github-success 问题",
+        "problem_description": "C:\\Users\\Administrator\\Documents\\GitHub\\follow-builders",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-15T22:43:32.414762",
+        "resolved_at": "2026-05-16 12:31:12"
+      },
+      {
+        "problem_title": "github-success 问题",
+        "problem_description": "follow builders  找找这个GitHub项目",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-15T22:43:32.414762",
+        "resolved_at": "2026-05-16 12:31:12"
+      },
+      {
+        "problem_title": "github-success 问题",
+        "problem_description": "现在已经有了会话压缩，这个只需要保存报告，也就是不需要什么都写进去，不过要把时间/会话/讨论什么问题/什么项目/与github是否有关/与之前的哪些讨论有关/与之前的哪些项目有关  说清楚，在加上3条新思考",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-15T22:54:07.015178",
+        "resolved_at": "2026-05-16 12:31:12"
+      },
+      {
+        "problem_title": "github-success 相关问题追踪",
+        "problem_description": null,
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16 12:31:12",
+        "resolved_at": "2026-05-16T19:05:52.033469"
+      },
+      {
+        "problem_title": "github-success 问题",
+        "problem_description": "在 GitHub 上搜索脑图（brain-map/mind-map）和知识图谱（knowledge-graph）相关的热门项目，研究它们的架构和特点。\n\n要求：\n1. 搜索关键词：brain-map、mind-map、knowledge-graph、graph-visualization 相关项目\n",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T11:04:25.877244",
+        "resolved_at": "2026-05-16 12:31:12"
+      },
+      {
+        "problem_title": "github-success 问题",
+        "problem_description": "去GitHub上找找脑图和知识图谱的项目研究一下",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T11:05:08.267489",
+        "resolved_at": "2026-05-16 12:31:12"
+      },
+      {
+        "problem_title": "github-success 问题",
+        "problem_description": "搜索 GitHub 上流行的知识图谱（Knowledge Graph）可视化项目，列出前10名：star数、项目名、描述、技术栈、主要特性。中文回复。",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T12:08:35.656076",
+        "resolved_at": "2026-05-16 12:31:12"
+      },
+      {
+        "problem_title": "github-success 问题",
+        "problem_description": "搜索GitHub上关于知识图谱(Knowledge Graph)的优秀项目、论文和教程。返回10-15个有代表性的仓库，包含名称、star数、简介和链接。",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T12:24:12.381448",
+        "resolved_at": "2026-05-16 12:31:12"
+      },
+      {
+        "problem_title": "github-success 问题",
+        "problem_description": "深度研究 Self-improving Agent（自改进 Agent）领域，找出：\n1. 核心定义和技术原理\n2. 主流开源实现（GitHub 项目）\n3. 关键论文和研究\n4. 最佳实践\n\n返回完整研究报告。",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T12:27:10.640404",
+        "resolved_at": "2026-05-16 12:31:12"
+      },
+      {
+        "problem_title": "github-success 问题",
+        "problem_description": "深度研究 GitHub 项目成功模式，找出：\n1. 高 Stars 项目的共同特征\n2. 项目传播规律\n3. 命名/品牌策略\n4. README 和文档最佳实践\n5. 代表性案例分析\n\n返回完整研究报告。",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T12:28:26.099828",
+        "resolved_at": "2026-05-16 12:31:12"
+      },
+      {
+        "problem_title": "github-success 问题",
+        "problem_description": "深度研究 AI Agent 框架领域：\n1. 主流框架对比（LangChain, LlamaIndex, AutoGen, MetaGPT, CrewAI等）\n2. 核心架构和特性\n3. GitHub Stars 和社区\n4. 适用场景\n5. 选择指南\n\n返回完整研究报告。",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T12:29:08.826931",
+        "resolved_at": "2026-05-16 12:31:12"
+      },
+      {
+        "problem_title": "github-success 问题",
+        "problem_description": "从以下文本数据中抽取知识图谱实体（人、公司、项目、框架、工具、概念等）。\n\n数据包括：\n- Self-improving Agent 研究\n- GitHub 成功模式分析\n- Cursor IDE 分析\n- MCP Protocol 研究\n- Agent 框架对比\n\n请抽取所有实体，返回 JSON ",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T13:08:53.419751",
+        "resolved_at": "2026-05-16 12:31:12"
+      },
+      {
+        "problem_title": "github-success 问题",
+        "problem_description": "从以下文本中抽取知识图谱三元组（实体关系对）。\n\n数据包括：\n- Self-improving Agent 研究\n- GitHub 成功模式分析\n- Cursor IDE 分析\n- MCP Protocol 研究\n- Agent 框架对比\n\n请抽取三元组，返回 JSON 数组格式。每条三元组包含：i",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T13:09:09.370721",
+        "resolved_at": "2026-05-16 12:31:12"
+      },
+      {
+        "problem_title": "github-success 问题",
+        "problem_description": "怎么感觉你对知识图谱的理解有问题啊，去GitHub找找知识图谱相关的论文和教程",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T13:25:15.226759",
+        "resolved_at": "2026-05-16 12:31:12"
+      },
+      {
+        "problem_title": "github-success 问题",
+        "problem_description": "[CONTEXT COMPACTION — REFERENCE ONLY] Earlier turns were compacted into the summary below. This is a handoff from a previous context window — treat it",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T13:49:04.269866",
+        "resolved_at": "2026-05-16 12:31:12"
+      }
+    ],
+    "reports": [
+      {
+        "report_id": "report_348741f8126f",
+        "title": "GitHub 项目成功模式深度研究报告",
+        "created_at": "2026-05-16 12:31:12",
+        "content_preview": "# GitHub 项目成功模式深度研究报告  ## 一、核心发现  ### 1.1 高 Stars 项目共同特征  | 特征 | 说明 | |------|------| | 解决真实痛点 | 开发者每天遇到的具体问题 | | 极低门槛 | 5分钟可运行 Hello World | | 差异化定位 | 在成熟领域找到细分突破口 | | 持续迭代 | 保持活跃度和社区信任 | | 清晰愿景 | 解决"
+      },
+      {
+        "report_id": "rpt_ed2921230652",
+        "title": "GitHub成功模式：开源项目从0到1的成长密码",
+        "created_at": "2026-05-16 14:38:36",
+        "content_preview": "## 一、问题背景（为什么会出现这个技术/概念）  ### 1.1 痛点：开源项目面临的生存困境  GitHub成功模式的出现源于开源项目的普遍困境：  | 困境类型 | 具体表现 | 后果 | |---------|---------|-----| | **冷启动难题** | 新仓库缺乏关注，难以获得初始用户 | 项目无人问津，逐渐消亡 | | **信任危机** | 用户对未知开源项目持怀疑态度"
+      }
+    ]
+  },
+  "knowledge-graph-auto-update": {
+    "versions": [
+      {
+        "version": "v1",
+        "stage": "explore",
+        "title": "knowledge-graph-auto-update 探索阶段",
+        "start_at": "2026-05-16 19:23:41",
+        "end_at": null,
+        "status": "open"
+      },
+      {
+        "version": "v2",
+        "stage": "design",
+        "title": "knowledge-graph-auto-update 设计阶段",
+        "start_at": "2026-05-16 19:23:41",
+        "end_at": null,
+        "status": "open"
+      },
+      {
+        "version": "v3",
+        "stage": "implement",
+        "title": "knowledge-graph-auto-update 实现阶段",
+        "start_at": "2026-05-16 19:23:41",
+        "end_at": null,
+        "status": "open"
+      }
+    ],
+    "problems": [
+      {
+        "problem_title": "knowledge-graph-auto-update 问题",
+        "problem_description": "Mermaid 语法（超简洁）：\n👤 User Query\n🔍 Embedding Model\n📚 Vector Database\n🔎 Retrieve\n⚙️ Augment\n🤖 LLM\n💬 Response\n📄 Documents\n流程：User Query → Embedding → Vecto",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-15T18:50:39.807778",
+        "resolved_at": "2026-05-16T16:35:40.620184"
+      },
+      {
+        "problem_title": "knowledge-graph-auto-update 问题",
+        "problem_description": "做一个超级索引脑图把我所有的文档报告和资料以及项目已经对话全部整合在一个脑图里，并持续自动更新",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T10:20:47.254243",
+        "resolved_at": "2026-05-16T16:35:40.620184"
+      },
+      {
+        "problem_title": "knowledge-graph-auto-update 问题",
+        "problem_description": "[CONTEXT COMPACTION — REFERENCE ONLY] Earlier turns were compacted into the summary below. This is a handoff from a previous context window — treat it",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T10:20:47.254243",
+        "resolved_at": "2026-05-16T16:35:40.620184"
+      },
+      {
+        "problem_title": "knowledge-graph-auto-update 相关问题追踪",
+        "problem_description": null,
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T16:35:40.620184",
+        "resolved_at": "2026-05-16T19:05:52.033469"
+      }
+    ],
+    "reports": [
+      {
+        "report_id": "report_7c3d74e173b6",
+        "title": "知识图谱自动更新系统：从三元组抽取到增量维护",
+        "created_at": "2026-05-16T16:35:40.620184",
+        "content_preview": "# 知识图谱自动更新系统：从三元组抽取到增量维护  ## 一、问题背景  ### 1.1 为什么需要知识图谱？  在 AI Agent 系统中，知识管理经历了三个阶段：  | 阶段 | 形式 | 缺点 | |------|------|------| | 文档堆砌 | 原始文本 | 无法查询、关系模糊 | | 向量检索 | embedding +相似度 | 丢失结构、无法推理 | | 知识图谱 |"
+      }
+    ]
+  },
+  "mcp-protocol": {
+    "versions": [
+      {
+        "version": "v1",
+        "stage": "explore",
+        "title": "mcp-protocol 探索阶段",
+        "start_at": "2026-05-16 19:23:41",
+        "end_at": null,
+        "status": "open"
+      },
+      {
+        "version": "v2",
+        "stage": "design",
+        "title": "mcp-protocol 设计阶段",
+        "start_at": "2026-05-16 19:23:41",
+        "end_at": null,
+        "status": "open"
+      },
+      {
+        "version": "v3",
+        "stage": "implement",
+        "title": "mcp-protocol 实现阶段",
+        "start_at": "2026-05-16 19:23:41",
+        "end_at": null,
+        "status": "open"
+      }
+    ],
+    "problems": [
+      {
+        "problem_title": "mcp-protocol 问题",
+        "problem_description": "研究 MCP Protocol (Model Context Protocol)，收集：1) 官方文档信息 2) 核心设计理念 3) 技术架构 4) 使用场景 5) 生态现状。整理成深度研究报告格式，约500字。返回完整报告内容。",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-15T21:33:41.118663",
+        "resolved_at": "2026-05-16 12:31:12"
+      },
+      {
+        "problem_title": "mcp-protocol 问题",
+        "problem_description": "AI Agent 工具协议\tMCP (Anthropic)\t-\t统一协议，AI Agent 工具调用标准\n自进化 Agent\tHermes Agent, MemOS\t150K+\tAgent 能从经验中学习、创建 skill\n工作流自动化 + AI\tn8n\t187K\t工作流编排 + AI 能力\n持久上",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-15T22:12:03.560801",
+        "resolved_at": "2026-05-16 12:31:12"
+      },
+      {
+        "problem_title": "mcp-protocol 相关问题追踪",
+        "problem_description": null,
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16 12:31:12",
+        "resolved_at": "2026-05-16T19:05:52.033469"
+      },
+      {
+        "problem_title": "mcp-protocol 问题",
+        "problem_description": "深度研究 MCP (Model Context Protocol) 领域：\n1. 核心概念和工作原理\n2. 官方实现和SDK\n3. MCP Servers 生态\n4. 与竞品对比\n5. 应用场景\n\n返回完整研究报告。",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T12:29:01.357923",
+        "resolved_at": "2026-05-16 12:31:12"
+      },
+      {
+        "problem_title": "mcp-protocol 问题",
+        "problem_description": "从以下文本数据中抽取知识图谱实体（人、公司、项目、框架、工具、概念等）。\n\n数据包括：\n- Self-improving Agent 研究\n- GitHub 成功模式分析\n- Cursor IDE 分析\n- MCP Protocol 研究\n- Agent 框架对比\n\n请抽取所有实体，返回 JSON ",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T13:08:53.419751",
+        "resolved_at": "2026-05-16 12:31:12"
+      },
+      {
+        "problem_title": "mcp-protocol 问题",
+        "problem_description": "从以下文本中抽取知识图谱三元组（实体关系对）。\n\n数据包括：\n- Self-improving Agent 研究\n- GitHub 成功模式分析\n- Cursor IDE 分析\n- MCP Protocol 研究\n- Agent 框架对比\n\n请抽取三元组，返回 JSON 数组格式。每条三元组包含：i",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T13:09:09.370721",
+        "resolved_at": "2026-05-16 12:31:12"
+      },
+      {
+        "problem_title": "mcp-protocol 问题",
+        "problem_description": "[CONTEXT COMPACTION — REFERENCE ONLY] Earlier turns were compacted into the summary below. This is a handoff from a previous context window — treat it",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T13:49:04.269866",
+        "resolved_at": "2026-05-16 12:31:12"
+      },
+      {
+        "problem_title": "mcp-protocol 问题",
+        "problem_description": "从 facts 表抽取三元组写入 kg_triples 表。先处理50条测试质量，最终目标是处理全部714条。\n\n数据库路径: C:/Users/Administrator/Desktop/kuakegongxxiang/askdb/data/knowledge.db\n\nkg_triples 表结构",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T14:05:16.923653",
+        "resolved_at": "2026-05-16 12:31:12"
+      }
+    ],
+    "reports": [
+      {
+        "report_id": "report_a35ee345d9ef",
+        "title": "MCP (Model Context Protocol) 深度研究报告",
+        "created_at": "2026-05-16 12:31:12",
+        "content_preview": "# MCP (Model Context Protocol) 深度研究报告  ## 一、核心定义  **Model Context Protocol (MCP)** 是 Anthropic 于 2024 年提出的开放标准协议，用于连接 AI 模型与外部数据源和工具。  ``` 使命：让 AI 模型能够安全地访问私有数据和工作流程 ```  ## 二、协议架构  ### 2.1 核心组件  ```"
+      },
+      {
+        "report_id": "rpt_5bca96f98dfa",
+        "title": "MCP协议：AI系统与工具交互的开放标准",
+        "created_at": "2026-05-16 14:43:12",
+        "content_preview": "## 一、问题背景（为什么会出现这个技术/概念）  ### 1.1 痛点：AI系统与工具集成的混乱现状  MCP协议出现之前，AI系统与外部工具的集成面临以下核心痛点：  | 痛点类型 | 具体表现 | 负面影响 | |---------|---------|---------| | **碎片化集成** | 每个AI应用各自维护一套工具连接 | 重复开发，生态割裂 | | **封闭生态** | 大"
+      }
+    ]
+  },
+  "report-standard": {
+    "versions": [
+      {
+        "version": "v1",
+        "stage": "explore",
+        "title": "report-standard 探索阶段",
+        "start_at": "2026-05-16 19:23:41",
+        "end_at": null,
+        "status": "open"
+      },
+      {
+        "version": "v2",
+        "stage": "design",
+        "title": "report-standard 设计阶段",
+        "start_at": "2026-05-16 19:23:41",
+        "end_at": null,
+        "status": "open"
+      },
+      {
+        "version": "v3",
+        "stage": "implement",
+        "title": "report-standard 实现阶段",
+        "start_at": "2026-05-16 19:23:41",
+        "end_at": null,
+        "status": "open"
+      }
+    ],
+    "problems": [
+      {
+        "problem_title": "report-standard 问题",
+        "problem_description": "先看 LLM-Agent-Paper-List 的综述论文\n再看 Prompt-Engineering-Guide 理解基础技术\n最后 根据需求研究 MetaGPT/AutoGen/CrewAI 框架",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-15T19:00:51.983563",
+        "resolved_at": "2026-05-16T16:33:53.586977"
+      },
+      {
+        "problem_title": "report-standard 问题",
+        "problem_description": "研究 Self-improving Agent 领域，聚焦 Hermes Agent 和 MemOS。收集：1) 官方文档 2) 自我改进机制 3) skill 创建流程 4) 架构设计 5) 与其他框架对比。整理成深度研究报告，约500字。",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-15T21:33:36.488292",
+        "resolved_at": "2026-05-16T16:33:53.586977"
+      },
+      {
+        "problem_title": "report-standard 问题",
+        "problem_description": "研究 MCP Protocol (Model Context Protocol)，收集：1) 官方文档信息 2) 核心设计理念 3) 技术架构 4) 使用场景 5) 生态现状。整理成深度研究报告格式，约500字。返回完整报告内容。",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-15T21:33:41.118663",
+        "resolved_at": "2026-05-16T16:33:53.586977"
+      },
+      {
+        "problem_title": "report-standard 问题",
+        "problem_description": "研究 n8n 工作流自动化 + AI，收集：1) 官方文档 2) 核心特性 3) AI 集成方式 4) 自托管/云端 5) 与其他自动化工具对比。整理成深度研究报告，约500字。",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-15T21:34:08.967759",
+        "resolved_at": "2026-05-16T16:33:53.586977"
+      },
+      {
+        "problem_title": "report-standard 问题",
+        "problem_description": "研究 Multi-Agent Systems (多智能体系统)，收集：1) 核心概念 2) 协作机制 3) 通信协议 4) 知名项目(MetaGPT等) 5) 应用场景。整理成深度研究报告，约500字。",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-15T21:35:00.685364",
+        "resolved_at": "2026-05-16T16:33:53.586977"
+      },
+      {
+        "problem_title": "report-standard 问题",
+        "problem_description": "研究 Coding Agent 生态，重点 Cursor IDE 和 agent-skills-hub。收集：1) 官方文档 2) 核心功能 3) AI 编程能力 4) 生态插件 5) 市场现状。整理成深度研究报告，约500字。",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-15T21:36:24.459522",
+        "resolved_at": "2026-05-16T16:33:53.586977"
+      },
+      {
+        "problem_title": "report-standard 问题",
+        "problem_description": "研究 Claude-mem (持久上下文/长期记忆)，收集：1) 官方文档 2) 记忆机制设计 3) 实现原理 4) 使用场景 5) 与其他持久记忆方案对比。整理成深度研究报告，约500字。",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-15T21:40:25.938304",
+        "resolved_at": "2026-05-16T16:33:53.586977"
+      },
+      {
+        "problem_title": "report-standard 问题",
+        "problem_description": "AI Agent 工具协议\tMCP (Anthropic)\t-\t统一协议，AI Agent 工具调用标准\n自进化 Agent\tHermes Agent, MemOS\t150K+\tAgent 能从经验中学习、创建 skill\n工作流自动化 + AI\tn8n\t187K\t工作流编排 + AI 能力\n持久上",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-15T22:12:03.560801",
+        "resolved_at": "2026-05-16T16:33:53.586977"
+      },
+      {
+        "problem_title": "report-standard 问题",
+        "problem_description": "先告诉我什么是你的深度研究，然后逐个研究这些项目，把报告存入数据库",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-15T22:43:32.414762",
+        "resolved_at": "2026-05-16T16:33:53.586977"
+      },
+      {
+        "problem_title": "report-standard 问题",
+        "problem_description": "去找资料研究一下vibe coding  和其他的主流编程思想",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-15T22:43:32.414762",
+        "resolved_at": "2026-05-16T16:33:53.586977"
+      },
+      {
+        "problem_title": "report-standard 问题",
+        "problem_description": "深度研究 /c/Users/Administrator/workspace/spec-kit-cn 仓库，输出：\n1. 项目架构和核心文件\n2. 与官方spec-kit的区别\n3. 中文本地化内容\n4. 主要功能模块\n5. 使用场景\n\n请仔细阅读README.md和主要源码文件，输出结构化研究报告。",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T10:02:50.384072",
+        "resolved_at": "2026-05-16T16:33:53.586977"
+      },
+      {
+        "problem_title": "report-standard 问题",
+        "problem_description": "深度研究 /c/Users/Administrator/workspace/spec-kit 仓库，输出：\n1. 项目架构和核心文件\n2. 核心功能和工作流\n3. 主要文件和模块的用途\n4. 关键设计模式\n5. AI编码agent集成方式\n6. 主要亮点和特点\n\n请仔细阅读README.md和主要源",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T10:03:03.133841",
+        "resolved_at": "2026-05-16T16:33:53.586977"
+      },
+      {
+        "problem_title": "report-standard 问题",
+        "problem_description": "在 GitHub 上搜索脑图（brain-map/mind-map）和知识图谱（knowledge-graph）相关的热门项目，研究它们的架构和特点。\n\n要求：\n1. 搜索关键词：brain-map、mind-map、knowledge-graph、graph-visualization 相关项目\n",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T11:04:25.877244",
+        "resolved_at": "2026-05-16T16:33:53.586977"
+      },
+      {
+        "problem_title": "report-standard 问题",
+        "problem_description": "去GitHub上找找脑图和知识图谱的项目研究一下",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T11:05:08.267489",
+        "resolved_at": "2026-05-16T16:33:53.586977"
+      },
+      {
+        "problem_title": "report-standard 问题",
+        "problem_description": "搜索知识图谱(Knowledge Graph)领域的经典论文和最新研究。返回10-15篇有代表性的论文，包含标题、作者、年份、引用数、核心贡献和链接。",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T12:24:32.522451",
+        "resolved_at": "2026-05-16T16:33:53.586977"
+      },
+      {
+        "problem_title": "report-standard 问题",
+        "problem_description": "深度研究 Self-improving Agent（自改进 Agent）领域，找出：\n1. 核心定义和技术原理\n2. 主流开源实现（GitHub 项目）\n3. 关键论文和研究\n4. 最佳实践\n\n返回完整研究报告。",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T12:27:10.640404",
+        "resolved_at": "2026-05-16T16:33:53.586977"
+      },
+      {
+        "problem_title": "report-standard 问题",
+        "problem_description": "深度研究 GitHub 项目成功模式，找出：\n1. 高 Stars 项目的共同特征\n2. 项目传播规律\n3. 命名/品牌策略\n4. README 和文档最佳实践\n5. 代表性案例分析\n\n返回完整研究报告。",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T12:28:26.099828",
+        "resolved_at": "2026-05-16T16:33:53.586977"
+      },
+      {
+        "problem_title": "report-standard 问题",
+        "problem_description": "深度研究 Cursor IDE 领域，找出：\n1. 核心功能和技术实现\n2. AI 代码编辑器的技术架构\n3. 关键交互设计（CMD+K 等）\n4. 与竞品的差异化分析\n5. 代表性项目和论文\n\n返回完整研究报告。",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T12:28:33.846518",
+        "resolved_at": "2026-05-16T16:33:53.586977"
+      },
+      {
+        "problem_title": "report-standard 问题",
+        "problem_description": "深度研究 MCP (Model Context Protocol) 领域：\n1. 核心概念和工作原理\n2. 官方实现和SDK\n3. MCP Servers 生态\n4. 与竞品对比\n5. 应用场景\n\n返回完整研究报告。",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T12:29:01.357923",
+        "resolved_at": "2026-05-16T16:33:53.586977"
+      },
+      {
+        "problem_title": "report-standard 问题",
+        "problem_description": "深度研究 AI Agent 框架领域：\n1. 主流框架对比（LangChain, LlamaIndex, AutoGen, MetaGPT, CrewAI等）\n2. 核心架构和特性\n3. GitHub Stars 和社区\n4. 适用场景\n5. 选择指南\n\n返回完整研究报告。",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T12:29:08.826931",
+        "resolved_at": "2026-05-16T16:33:53.586977"
+      },
+      {
+        "problem_title": "report-standard 问题",
+        "problem_description": "从以下文本数据中抽取知识图谱实体（人、公司、项目、框架、工具、概念等）。\n\n数据包括：\n- Self-improving Agent 研究\n- GitHub 成功模式分析\n- Cursor IDE 分析\n- MCP Protocol 研究\n- Agent 框架对比\n\n请抽取所有实体，返回 JSON ",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T13:08:53.419751",
+        "resolved_at": "2026-05-16T16:33:53.586977"
+      },
+      {
+        "problem_title": "report-standard 问题",
+        "problem_description": "从以下文本中抽取知识图谱三元组（实体关系对）。\n\n数据包括：\n- Self-improving Agent 研究\n- GitHub 成功模式分析\n- Cursor IDE 分析\n- MCP Protocol 研究\n- Agent 框架对比\n\n请抽取三元组，返回 JSON 数组格式。每条三元组包含：i",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T13:09:09.370721",
+        "resolved_at": "2026-05-16T16:33:53.586977"
+      },
+      {
+        "problem_title": "report-standard 问题",
+        "problem_description": "把每一都深度研究了，保存独立的报告到数据库",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T13:25:15.226759",
+        "resolved_at": "2026-05-16T16:33:53.586977"
+      },
+      {
+        "problem_title": "report-standard 问题",
+        "problem_description": "[CONTEXT COMPACTION — REFERENCE ONLY] Earlier turns were compacted into the summary below. This is a handoff from a previous context window — treat it",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T13:49:04.269866",
+        "resolved_at": "2026-05-16T16:33:53.586977"
+      },
+      {
+        "problem_title": "report-standard 问题",
+        "problem_description": "会话压缩先不要压缩，会话压缩之后搜索出问题了，你研究一下",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T14:16:01.291826",
+        "resolved_at": "2026-05-16T16:33:53.586977"
+      },
+      {
+        "problem_title": "report-standard 相关问题追踪",
+        "problem_description": null,
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T16:33:53.586977",
+        "resolved_at": "2026-05-16T19:05:52.033469"
+      }
+    ],
+    "reports": [
+      {
+        "report_id": "report-standard-20260516163353",
+        "title": "深度研究报告标准：主张-证据双栏平衡法",
+        "created_at": "2026-05-16T16:33:53.586977",
+        "content_preview": "# 深度研究报告标准：主张-证据双栏平衡法  ## 一、为什么需要新的报告标准  ### 1.1 现有问题  | 问题类型 | 具体表现 | 影响 | |----------|----------|------| | 主张裸奔 | 结论没有证据支撑 | 可信度低 | | 证据孤立 | 数据/引用没有对应主张 | 逻辑断裂 | | 引用混乱 | 来源格式不统一，难以追溯 | 复用困难 | | 深度不"
+      }
+    ]
+  },
+  "self-improving-agent": {
+    "versions": [
+      {
+        "version": "v1",
+        "stage": "explore",
+        "title": "self-improving-agent 探索阶段",
+        "start_at": "2026-05-16 19:23:41",
+        "end_at": null,
+        "status": "open"
+      },
+      {
+        "version": "v2",
+        "stage": "design",
+        "title": "self-improving-agent 设计阶段",
+        "start_at": "2026-05-16 19:23:41",
+        "end_at": null,
+        "status": "open"
+      },
+      {
+        "version": "v3",
+        "stage": "implement",
+        "title": "self-improving-agent 实现阶段",
+        "start_at": "2026-05-16 19:23:41",
+        "end_at": null,
+        "status": "open"
+      }
+    ],
+    "problems": [
+      {
+        "problem_title": "self-improving-agent 问题",
+        "problem_description": "研究 Self-improving Agent 领域，聚焦 Hermes Agent 和 MemOS。收集：1) 官方文档 2) 自我改进机制 3) skill 创建流程 4) 架构设计 5) 与其他框架对比。整理成深度研究报告，约500字。",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-15T21:33:36.488292",
+        "resolved_at": "2026-05-16 12:31:12"
+      },
+      {
+        "problem_title": "self-improving-agent 问题",
+        "problem_description": "AI Agent 工具协议\tMCP (Anthropic)\t-\t统一协议，AI Agent 工具调用标准\n自进化 Agent\tHermes Agent, MemOS\t150K+\tAgent 能从经验中学习、创建 skill\n工作流自动化 + AI\tn8n\t187K\t工作流编排 + AI 能力\n持久上",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-15T22:12:03.560801",
+        "resolved_at": "2026-05-16 12:31:12"
+      },
+      {
+        "problem_title": "self-improving-agent 相关问题追踪",
+        "problem_description": null,
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16 12:31:12",
+        "resolved_at": "2026-05-16T19:05:52.033469"
+      },
+      {
+        "problem_title": "self-improving-agent 问题",
+        "problem_description": "深度研究 Self-improving Agent（自改进 Agent）领域，找出：\n1. 核心定义和技术原理\n2. 主流开源实现（GitHub 项目）\n3. 关键论文和研究\n4. 最佳实践\n\n返回完整研究报告。",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T12:27:10.640404",
+        "resolved_at": "2026-05-16 12:31:12"
+      },
+      {
+        "problem_title": "self-improving-agent 问题",
+        "problem_description": "从以下文本数据中抽取知识图谱实体（人、公司、项目、框架、工具、概念等）。\n\n数据包括：\n- Self-improving Agent 研究\n- GitHub 成功模式分析\n- Cursor IDE 分析\n- MCP Protocol 研究\n- Agent 框架对比\n\n请抽取所有实体，返回 JSON ",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T13:08:53.419751",
+        "resolved_at": "2026-05-16 12:31:12"
+      },
+      {
+        "problem_title": "self-improving-agent 问题",
+        "problem_description": "从以下文本中抽取知识图谱三元组（实体关系对）。\n\n数据包括：\n- Self-improving Agent 研究\n- GitHub 成功模式分析\n- Cursor IDE 分析\n- MCP Protocol 研究\n- Agent 框架对比\n\n请抽取三元组，返回 JSON 数组格式。每条三元组包含：i",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T13:09:09.370721",
+        "resolved_at": "2026-05-16 12:31:12"
+      },
+      {
+        "problem_title": "self-improving-agent 问题",
+        "problem_description": "[CONTEXT COMPACTION — REFERENCE ONLY] Earlier turns were compacted into the summary below. This is a handoff from a previous context window — treat it",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T13:49:04.269866",
+        "resolved_at": "2026-05-16 12:31:12"
+      }
+    ],
+    "reports": [
+      {
+        "report_id": "report_739136caba29",
+        "title": "Self-Improving Agent 深度研究报告",
+        "created_at": "2026-05-16 12:31:12",
+        "content_preview": "# Self-Improving Agent（自改进 Agent）深度研究报告  ## 一、核心定义  **Self-Improving Agent** 是指能够从经验中持续学习和进化的 AI Agent 系统。核心思想： - **Execute → Evaluate → Extract → Update → Reuse** 循环 - 让 AI 在每次任务执行后反思改进  ## 二、主流实现方案"
+      },
+      {
+        "report_id": "rpt_d5193b65b0ae",
+        "title": "自改进Agent：从静态智能到动态进化的技术革命",
+        "created_at": "2026-05-16 14:37:03",
+        "content_preview": "## 一、问题背景（为什么会出现这个技术/概念）  ### 1.1 痛点：传统AI系统的局限性  在自改进Agent出现之前，AI系统存在以下核心痛点：  | 痛点类型 | 具体表现 | 负面影响 | |---------|---------|---------| | **静态能力** | 训练后能力固定，无法在线进化 | 无法适应变化的任务需求 | | **人工干预依赖** | 每次优化都需要人"
+      }
+    ]
+  },
+  "triple-extractor": {
+    "versions": [
+      {
+        "version": "v1",
+        "stage": "explore",
+        "title": "triple-extractor 探索阶段",
+        "start_at": "2026-05-16 19:23:41",
+        "end_at": null,
+        "status": "open"
+      },
+      {
+        "version": "v2",
+        "stage": "design",
+        "title": "triple-extractor 设计阶段",
+        "start_at": "2026-05-16 19:23:41",
+        "end_at": null,
+        "status": "open"
+      },
+      {
+        "version": "v3",
+        "stage": "implement",
+        "title": "triple-extractor 实现阶段",
+        "start_at": "2026-05-16 19:23:41",
+        "end_at": null,
+        "status": "open"
+      }
+    ],
+    "problems": [
+      {
+        "problem_title": "triple-extractor 问题",
+        "problem_description": "从以下文本中抽取知识图谱三元组（实体关系对）。\n\n数据包括：\n- Self-improving Agent 研究\n- GitHub 成功模式分析\n- Cursor IDE 分析\n- MCP Protocol 研究\n- Agent 框架对比\n\n请抽取三元组，返回 JSON 数组格式。每条三元组包含：i",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T13:09:09.370721",
+        "resolved_at": "2026-05-16T16:44:25.055222"
+      },
+      {
+        "problem_title": "triple-extractor 问题",
+        "problem_description": "[CONTEXT COMPACTION — REFERENCE ONLY] Earlier turns were compacted into the summary below. This is a handoff from a previous context window — treat it",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T13:49:04.269866",
+        "resolved_at": "2026-05-16T16:44:25.055222"
+      },
+      {
+        "problem_title": "triple-extractor 问题",
+        "problem_description": "kg_triples\t0条\t⚠️ 三元组表是空的  为什么要做这个",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T13:53:43.545304",
+        "resolved_at": "2026-05-16T16:44:25.055222"
+      },
+      {
+        "problem_title": "triple-extractor 问题",
+        "problem_description": "从 facts 表抽取三元组写入 kg_triples 表。先处理50条测试质量，最终目标是处理全部714条。\n\n数据库路径: C:/Users/Administrator/Desktop/kuakegongxxiang/askdb/data/knowledge.db\n\nkg_triples 表结构",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T14:05:16.923653",
+        "resolved_at": "2026-05-16T16:44:25.055222"
+      },
+      {
+        "problem_title": "triple-extractor 相关问题追踪",
+        "problem_description": null,
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T16:44:25.055222",
+        "resolved_at": "2026-05-16T19:05:52.033469"
+      }
+    ],
+    "reports": [
+      {
+        "report_id": "triple-extractor-20260516164425",
+        "title": "三元组抽取流程：从报告到知识图谱",
+        "created_at": "2026-05-16T16:44:25.055222",
+        "content_preview": "# 三元组抽取流程：从报告到知识图谱  ## 一、流程概述  每次生成深度研究报告时，自动抽取实体和关系存入知识图谱（KG）。  ``` 报告写入 research_reports         ↓ 调用 triple_extractor.py         ↓ 提取实体和三元组         ↓ 存入 kg_entities 和 kg_triples ```  ---  ## 二、工具位置"
+      }
+    ]
+  },
+  "图谱规范开发": {
+    "versions": [
+      {
+        "version": "v1",
+        "stage": "explore",
+        "title": "图谱规范开发 探索阶段",
+        "start_at": "2026-05-16 19:23:41",
+        "end_at": null,
+        "status": "open"
+      },
+      {
+        "version": "v2",
+        "stage": "design",
+        "title": "图谱规范开发 设计阶段",
+        "start_at": "2026-05-16 19:23:41",
+        "end_at": null,
+        "status": "open"
+      },
+      {
+        "version": "v3",
+        "stage": "implement",
+        "title": "图谱规范开发 实现阶段",
+        "start_at": "2026-05-16 19:23:41",
+        "end_at": null,
+        "status": "open"
+      }
+    ],
+    "problems": [
+      {
+        "problem_title": "图谱规范开发 问题",
+        "problem_description": "做一个每3小时生成一次增量工作报告并存入新数据库的项目，报告包含所有的会话增量，要有明确的时间和会话来源，以及在知识库里自动建立知识图谱",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T10:20:47.254243",
+        "resolved_at": "2026-05-16T16:51:08.083591"
+      },
+      {
+        "problem_title": "图谱规范开发 问题",
+        "problem_description": "更新数据库的文档，补充更新的内容。做一个新的图谱规范开发的论文，把这次的开发经历作为案例写进去。",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T10:41:27.507501",
+        "resolved_at": "2026-05-16T16:51:08.083591"
+      },
+      {
+        "problem_title": "图谱规范开发 问题",
+        "problem_description": "在 GitHub 上搜索脑图（brain-map/mind-map）和知识图谱（knowledge-graph）相关的热门项目，研究它们的架构和特点。\n\n要求：\n1. 搜索关键词：brain-map、mind-map、knowledge-graph、graph-visualization 相关项目\n",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T11:04:25.877244",
+        "resolved_at": "2026-05-16T16:51:08.083591"
+      },
+      {
+        "problem_title": "图谱规范开发 问题",
+        "problem_description": "去GitHub上找找脑图和知识图谱的项目研究一下",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T11:05:08.267489",
+        "resolved_at": "2026-05-16T16:51:08.083591"
+      },
+      {
+        "problem_title": "图谱规范开发 问题",
+        "problem_description": "[Your active task list was preserved across context compression]\n- [>] 1. 图谱规范开发 SPEC: AskDB 可视化与查询增强 (in_progress)\n- [ ] 2. 自然语言查询接口: Flask API + LLM",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T11:05:08.267489",
+        "resolved_at": "2026-05-16T16:51:08.083591"
+      },
+      {
+        "problem_title": "图谱规范开发 问题",
+        "problem_description": "克隆其他知识图谱项目到 workspace",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T11:46:59.691375",
+        "resolved_at": "2026-05-16T16:51:08.083591"
+      },
+      {
+        "problem_title": "图谱规范开发 问题",
+        "problem_description": "能不能把你的这个脑图和知识图谱都卸载了，等一下重新装",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T11:56:15.449976",
+        "resolved_at": "2026-05-16T16:51:08.083591"
+      },
+      {
+        "problem_title": "图谱规范开发 问题",
+        "problem_description": "搜索 GitHub 上流行的知识图谱（Knowledge Graph）可视化项目，列出前10名：star数、项目名、描述、技术栈、主要特性。中文回复。",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T12:08:35.656076",
+        "resolved_at": "2026-05-16T16:51:08.083591"
+      },
+      {
+        "problem_title": "图谱规范开发 问题",
+        "problem_description": "搜索GitHub上关于知识图谱(Knowledge Graph)的优秀项目、论文和教程。返回10-15个有代表性的仓库，包含名称、star数、简介和链接。",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T12:24:12.381448",
+        "resolved_at": "2026-05-16T16:51:08.083591"
+      },
+      {
+        "problem_title": "图谱规范开发 问题",
+        "problem_description": "搜索知识图谱(Knowledge Graph)领域的经典论文和最新研究。返回10-15篇有代表性的论文，包含标题、作者、年份、引用数、核心贡献和链接。",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T12:24:32.522451",
+        "resolved_at": "2026-05-16T16:51:08.083591"
+      },
+      {
+        "problem_title": "图谱规范开发 问题",
+        "problem_description": "从以下文本数据中抽取知识图谱实体（人、公司、项目、框架、工具、概念等）。\n\n数据包括：\n- Self-improving Agent 研究\n- GitHub 成功模式分析\n- Cursor IDE 分析\n- MCP Protocol 研究\n- Agent 框架对比\n\n请抽取所有实体，返回 JSON ",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T13:08:53.419751",
+        "resolved_at": "2026-05-16T16:51:08.083591"
+      },
+      {
+        "problem_title": "图谱规范开发 问题",
+        "problem_description": "从以下 chunk 数据中抽取知识图谱实体。\n\n这些 chunks 包含各种技术文档片段，包括：\n- AI Agent 相关技术\n- 编程框架和工具\n- 开源项目信息\n- 技术概念和术语\n\n请抽取所有实体，返回 JSON 数组格式。每个实体包含：id, name, type_category, ty",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T13:08:59.518327",
+        "resolved_at": "2026-05-16T16:51:08.083591"
+      },
+      {
+        "problem_title": "图谱规范开发 问题",
+        "problem_description": "从以下文本中抽取知识图谱三元组（实体关系对）。\n\n数据包括：\n- Self-improving Agent 研究\n- GitHub 成功模式分析\n- Cursor IDE 分析\n- MCP Protocol 研究\n- Agent 框架对比\n\n请抽取三元组，返回 JSON 数组格式。每条三元组包含：i",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T13:09:09.370721",
+        "resolved_at": "2026-05-16T16:51:08.083591"
+      },
+      {
+        "problem_title": "图谱规范开发 问题",
+        "problem_description": "读取 C:\\Users\\Administrator\\workspace\\graphforge\\raw_text.txt，抽取更多知识图谱实体。\n\n目标：再抽取 50+ 实体，id从ent_200开始。输出JSON数组。",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T13:25:15.082852",
+        "resolved_at": "2026-05-16T16:51:08.083591"
+      },
+      {
+        "problem_title": "图谱规范开发 问题",
+        "problem_description": "行吧，开始改造现有数据库，旧的知识图谱停用，启用新的细颗粒度模式",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T13:25:15.226759",
+        "resolved_at": "2026-05-16T16:51:08.083591"
+      },
+      {
+        "problem_title": "图谱规范开发 问题",
+        "problem_description": "怎么感觉你对知识图谱的理解有问题啊，去GitHub找找知识图谱相关的论文和教程",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T13:25:15.226759",
+        "resolved_at": "2026-05-16T16:51:08.083591"
+      },
+      {
+        "problem_title": "图谱规范开发 问题",
+        "problem_description": "[CONTEXT COMPACTION — REFERENCE ONLY] Earlier turns were compacted into the summary below. This is a handoff from a previous context window — treat it",
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T13:49:04.269866",
+        "resolved_at": "2026-05-16T16:51:08.083591"
+      },
+      {
+        "problem_title": "图谱规范开发 相关问题追踪",
+        "problem_description": null,
+        "priority": "P2",
+        "status": "resolved",
+        "first_observed_at": "2026-05-16T16:51:08.083591",
+        "resolved_at": "2026-05-16T19:05:52.033469"
+      }
+    ],
+    "reports": [
+      {
+        "report_id": "graphspec-paper-20260516165108",
+        "title": "图谱规范开发（GraphSpec）：一种融合可视化与结构化的知识图谱构建方法论",
+        "created_at": "2026-05-16T16:51:08.083591",
+        "content_preview": "# 图谱规范开发：一种融合可视化与结构化的知识图谱构建方法论  > **GraphSpec: A Methodology for Knowledge Graph Development Integrating Visualization and Structured Specification**  > 作者: 探索型 AI 工作流研究 > 完成时间: 2026-05-16 > 状态: 实践验证完"
+      }
+    ]
+  }
+}
+        );
+            mermaid.run
