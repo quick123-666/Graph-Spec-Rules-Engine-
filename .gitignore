@@ -1,0 +1,11 @@
+# 数据文件（太大）
+*.txt
+*.json
+
+# IDE
+.vscode/
+.idea/
+
+# 系统
+.DS_Store
+Thumbs.db

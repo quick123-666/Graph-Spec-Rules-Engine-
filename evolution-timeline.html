@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>图谱演化时间线 - GraphSpec</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+               background: #0f1419; color: #e6e6e6; padding: 2rem; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 { color: #4ade80; margin-bottom: 0.5rem; }
+        .subtitle { color: #888; margin-bottom: 2rem; }
+        .stats { display: flex; gap: 2rem; margin-bottom: 2rem; }
+        .stat { background: #1a2332; padding: 1rem 1.5rem; border-radius: 8px; }
+        .stat-value { font-size: 2rem; color: #4ade80; font-weight: bold; }
+        .stat-label { color: #888; font-size: 0.875rem; }
+        .section { margin-bottom: 2rem; }
+        .section-title { color: #4ade80; margin-bottom: 1rem; font-size: 1.25rem; }
+        .topic-card { background: #1a2332; border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem; }
+        .topic-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+        .topic-name { font-size: 1.125rem; font-weight: 600; color: #fff; }
+        .topic-meta { color: #888; font-size: 0.875rem; }
+        .version-list { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+        .version-tag { padding: 0.375rem 0.75rem; border-radius: 4px; font-size: 0.875rem; }
+        .explore { background: #1e3a5f; color: #60a5fa; }
+        .design { background: #3b1f5f; color: #a78bfa; }
+        .implement { background: #1f3f1f; color: #4ade80; }
+        .timeline-section { background: #1a2332; border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem; }
+        .mermaid { background: #1a2332; padding: 1rem; border-radius: 8px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌐 图谱演化时间线</h1>
+        <p class="subtitle">GraphSpec Rules Engine - 技术演化追踪</p>
+
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-value">10</div>
+                <div class="stat-label">技术主题</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">30</div>
+                <div class="stat-label">版本总数</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">118</div>
+                <div class="stat-label">问题总数</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">30</div>
+                <div class="stat-label">演化三元组</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">📊 技术版本概览</h2>
+
+            <div class="topic-card">
+                <div class="topic-header">
+                    <span class="topic-name">agent-framework</span>
+                    <span class="topic-meta">15 个问题</span>
+                </div>
+                <div class="version-list">
+                    <span class="version-tag explore">v1/explore</span>
+                    <span class="version-tag design">v2/design</span>
+                    <span class="version-tag implement">v3/implement</span>
+                </div>
+            </div>
+
+            <div class="topic-card">
+                <div class="topic-header">
+                    <span class="topic-name">cursor-ide</span>
+                    <span class="topic-meta">8 个问题</span>
+                </div>
+                <div class="version-list">
+                    <span class="version-tag explore">v1/explore</span>
+                    <span class="version-tag design">v2/design</span>
+                    <span class="version-tag implement">v3/implement</span>
+                </div>
+            </div>
+
+            <div class="topic-card">
+                <div class="topic-header">
+                    <span class="topic-name">fts-search-mode</span>
+                    <span class="topic-meta">9 个问题</span>
+                </div>
+                <div class="version-list">
+                    <span class="version-tag explore">v1/explore</span>
+                    <span class="version-tag design">v2/design</span>
+                    <span class="version-tag implement">v3/implement</span>
+                </div>
+            </div>
+
+            <div class="topic-card">
+                <div class="topic-header">
+                    <span class="topic-name">github-success</span>
+                    <span class="topic-meta">18 个问题</span>
+                </div>
+                <div class="version-list">
+                    <span class="version-tag explore">v1/explore</span>
+                    <span class="version-tag design">v2/design</span>
+                    <span class="version-tag implement">v3/implement</span>
+                </div>
+            </div>
+
+            <div class="topic-card">
+                <div class="topic-header">
+                    <span class="topic-name">knowledge-graph-auto-update</span>
+                    <span class="topic-meta">4 个问题</span>
+                </div>
+                <div class="version-list">
+                    <span class="version-tag explore">v1/explore</span>
+                    <span class="version-tag design">v2/design</span>
+                    <span class="version-tag implement">v3/implement</span>
+                </div>
+            </div>
+
+            <div class="topic-card">
+                <div class="topic-header">
+                    <span class="topic-name">mcp-protocol</span>
+                    <span class="topic-meta">8 个问题</span>
+                </div>
+                <div class="version-list">
+                    <span class="version-tag explore">v1/explore</span>
+                    <span class="version-tag design">v2/design</span>
+                    <span class="version-tag implement">v3/implement</span>
+                </div>
+            </div>
+
+            <div class="topic-card">
+                <div class="topic-header">
+                    <span class="topic-name">report-standard</span>
+                    <span class="topic-meta">26 个问题</span>
+                </div>
+                <div class="version-list">
+                    <span class="version-tag explore">v1/explore</span>
+                    <span class="version-tag design">v2/design</span>
+                    <span class="version-tag implement">v3/implement</span>
+                </div>
+            </div>
+
+            <div class="topic-card">
+                <div class="topic-header">
+                    <span class="topic-name">self-improving-agent</span>
+                    <span class="topic-meta">7 个问题</span>
+                </div>
+                <div class="version-list">
+                    <span class="version-tag explore">v1/explore</span>
+                    <span class="version-tag design">v2/design</span>
+                    <span class="version-tag implement">v3/implement</span>
+                </div>
+            </div>
+
+            <div class="topic-card">
+                <div class="topic-header">
+                    <span class="topic-name">triple-extractor</span>
+                    <span class="topic-meta">5 个问题</span>
+                </div>
+                <div class="version-list">
+                    <span class="version-tag explore">v1/explore</span>
+                    <span class="version-tag design">v2/design</span>
+                    <span class="version-tag implement">v3/implement</span>
+                </div>
+            </div>
+
+            <div class="topic-card">
+                <div class="topic-header">
+                    <span class="topic-name">图谱规范开发</span>
+                    <span class="topic-meta">18 个问题</span>
+                </div>
+                <div class="version-list">
+                    <span class="version-tag explore">v1/explore</span>
+                    <span class="version-tag design">v2/design</span>
+                    <span class="version-tag implement">v3/implement</span>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="timeline-section">
+            <h2 class="section-title">📈 演化时间线</h2>
+            <div class="mermaid">
+timeline
+        agent-framework (15 problems)
+        v1:探索
+        v2:设计
+        v3:实现
+        cursor-ide (8 problems)
+        v1:探索
+        v2:设计
+        v3:实现
+        fts-search-mode (9 problems)
+        v1:探索
+        v2:设计
+        v3:实现
+        github-success (18 problems)
+        v1:探索
+        v2:设计
+        v3:实现
+        knowledge-graph-auto-update (4 problems)
+        v1:探索
+        v2:设计
+        v3:实现
+        mcp-protocol (8 problems)
+        v1:探索
+        v2:设计
+        v3:实现
+        report-standard (26 problems)
+        v1:探索
+        v2:设计
+        v3:实现
+        self-improving-agent (7 problems)
+        v1:探索
+        v2:设计
+        v3:实现
+        triple-extractor (5 problems)
+        v1:探索
+        v2:设计
+        v3:实现
+        图谱规范开发 (18 problems)
+        v1:探索
+        v2:设计
+        v3:实现
+            </div>
+        </div>
+    </div>
+
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'dark',
+            timeline: { show脆弱性: false }
+        });
+    </script>
+</body>
+</html>

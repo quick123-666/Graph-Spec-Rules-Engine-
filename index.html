@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GraphForge - 知识图谱</title>
+  <script src="https://unpkg.com/@antv/g6@4.8.24/dist/g6.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f0f23; color: #e0e0e0; overflow: hidden; }
+    #container { width: 100vw; height: 100vh; }
+    
+    /* 搜索栏 */
+    .search-bar { position: absolute; top: 16px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; z-index: 100; }
+    .search-input { width: 300px; padding: 10px 16px; background: rgba(20,20,40,0.95); border: 1px solid rgba(99,102,241,0.4); border-radius: 24px; color: #e0e0e0; font-size: 14px; outline: none; }
+    .search-input:focus { border-color: #818cf8; box-shadow: 0 0 20px rgba(99,102,241,0.3); }
+    .search-btn { padding: 10px 20px; background: rgba(99,102,241,0.4); border: 1px solid rgba(99,102,241,0.6); border-radius: 24px; color: #e0e0e0; cursor: pointer; font-size: 14px; }
+    .search-btn:hover { background: rgba(99,102,241,0.6); }
+    
+    /* 搜索结果 */
+    .search-results { position: absolute; top: 70px; left: 50%; transform: translateX(-50%); width: 480px; max-height: 280px; background: rgba(20,20,40,0.97); border: 1px solid rgba(99,102,241,0.3); border-radius: 12px; overflow-y: auto; display: none; z-index: 99; }
+    .search-results.show { display: block; }
+    .result-item { padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; }
+    .result-item:hover { background: rgba(99,102,241,0.15); }
+    .result-type { font-size: 10px; padding: 2px 6px; background: rgba(99,102,241,0.3); border-radius: 4px; color: #a5b4fc; margin-right: 8px; }
+    .result-title { color: #e0e0e0; font-size: 13px; margin: 4px 0; }
+    .result-text { font-size: 11px; color: #a1a1aa; line-height: 1.4; }
+    .highlight { background: rgba(250,204,21,0.3); color: #fde047; padding: 0 2px; border-radius: 2px; }
+    
+    /* 侧边栏 */
+    .panel { position: absolute; top: 16px; left: 16px; background: rgba(20,20,40,0.95); border: 1px solid rgba(99,102,241,0.3); border-radius: 12px; padding: 14px; width: 260px; max-height: calc(100vh - 120px); overflow-y: auto; }
+    .panel h3 { color: #818cf8; font-size: 13px; margin-bottom: 10px; }
+    .topic-item { padding: 8px 10px; margin: 3px 0; background: rgba(255,255,255,0.03); border-radius: 6px; border-left: 3px solid #4f46e5; cursor: pointer; font-size: 12px; }
+    .topic-item:hover { background: rgba(99,102,241,0.15); }
+    .topic-item.active { background: rgba(99,102,241,0.25); border-left-color: #22d3ee; }
+    .topic-item.matched { border-left-color: #fbbf24; background: rgba(250,204,21,0.1); }
+    .topic-name { color: #e0e0e0; font-weight: 500; }
+    .topic-meta { font-size: 10px; color: #71717a; margin-top: 3px; }
+    
+    /* 详情面板 */
+    .detail-panel { position: absolute; top: 16px; right: 16px; background: rgba(20,20,40,0.95); border: 1px solid rgba(99,102,241,0.3); border-radius: 12px; padding: 14px; width: 300px; max-height: calc(100vh - 120px); overflow-y: auto; display: none; }
+    .detail-panel.show { display: block; }
+    .detail-title { color: #818cf8; font-size: 15px; margin-bottom: 10px; }
+    .detail-section { margin: 10px 0; }
+    .detail-section h4 { color: #a78bfa; font-size: 11px; margin-bottom: 4px; }
+    .detail-section p { font-size: 12px; color: #d4d4d8; line-height: 1.5; }
+    .tag { display: inline-block; padding: 2px 6px; background: rgba(99,102,241,0.2); border-radius: 4px; font-size: 10px; color: #a5b4fc; margin: 2px; }
+    .fact-item { padding: 6px 8px; margin: 3px 0; background: rgba(255,255,255,0.03); border-radius: 4px; font-size: 11px; color: #a1a1aa; }
+    
+    /* 统计 */
+    .stats { position: absolute; bottom: 16px; left: 16px; background: rgba(20,20,40,0.9); border: 1px solid rgba(99,102,241,0.3); border-radius: 8px; padding: 6px 14px; font-size: 11px; color: #a1a1aa; }
+    .stats span { color: #818cf8; }
+    
+    /* 控制按钮 */
+    .controls { position: absolute; bottom: 16px; right: 16px; display: flex; gap: 6px; }
+    .btn { padding: 6px 14px; background: rgba(99,102,241,0.3); border: 1px solid rgba(99,102,241,0.5); border-radius: 6px; color: #e0e0e0; cursor: pointer; font-size: 12px; }
+    .btn:hover { background: rgba(99,102,241,0.5); }
+    
+    #loading { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); color: #818cf8; font-size: 16px; }
+  </style>
+</head>
+<body>
+  <div id="container"></div>
+  <div id="loading">加载知识图谱数据...</div>
+  
+  <div class="search-bar">
+    <input type="text" class="search-input" id="searchInput" placeholder="搜索主题、事实、关系..." onkeyup="handleSearch(event)">
+    <button class="search-btn" onclick="doSearch()">🔍</button>
+  </div>
+  <div class="search-results" id="searchResults"></div>
+  
+  <div class="panel" id="topicPanel" style="display:none">
+    <h3>📚 主题</h3>
+    <div id="topicList"></div>
+  </div>
+
+  <div class="detail-panel" id="detailPanel">
+    <h3 class="detail-title" id="detailTitle">主题详情</h3>
+    <div class="detail-section"><h4>别名</h4><p id="aliasText">-</p></div>
+    <div class="detail-section"><h4>描述</h4><p id="descText">-</p></div>
+    <div class="detail-section"><h4>事实</h4><div id="factsList"></div></div>
+    <div class="detail-section"><h4>关系</h4><div id="relationsList"></div></div>
+  </div>
+
+  <div class="stats">节点: <span id="nodeCount">0</span> | 边: <span id="edgeCount">0</span> | 事实: <span id="factCount">0</span></div>
+
+  <div class="controls">
+    <button class="btn" onclick="fitView()">适应</button>
+    <button class="btn" onclick="toggleLabels()">标签</button>
+    <button class="btn" onclick="togglePanel()">列表</button>
+    <button class="btn" onclick="clearSearch()">清除</button>
+  </div>
+
+  <script>
+    let graph = null, graphData = { nodes: [], edges: [] };
+    let topicsData = [], factsData = [], edgesData = [];
+    let showLabels = true, searchMode = false;
+    let highlightedNodes = new Set(), highlightedEdges = new Set();
+
+    // 颜色
+    const colorMap = {
+      'self-improving-agent': { fill: '#4f46e5', stroke: '#818cf8' },
+      'github-success': { fill: '#059669', stroke: '#34d399' },
+      'cursor-ide': { fill: '#0891b2', stroke: '#22d3ee' },
+      'mcp-protocol': { fill: '#d97706', stroke: '#fbbf24' },
+      'agent-framework': { fill: '#db2777', stroke: '#f472b6' },
+      'default': { fill: '#6366f1', stroke: '#818cf8' }
+    };
+    const relColors = { 'uses': '#22c55e', 'implements': '#3b82f6', 'powers': '#f59e0b', 'is_a': '#ef4444', 'related_to': '#8b5cf6', 'default': '#64748b' };
+
+    function getColor(name) { return colorMap[name?.toLowerCase()] || colorMap['default']; }
+    function getRelColor(rel) { return relColors[rel?.toLowerCase()] || relColors['default']; }
+
+    async function loadData() {
+      const response = await fetch('data.json');
+      const db = await response.json();
+      topicsData = db.topics;
+      factsData = db.facts;
+      edgesData = db.edges;
+
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('topicPanel').style.display = 'block';
+      document.getElementById('nodeCount').textContent = topicsData.length;
+      document.getElementById('edgeCount').textContent = edgesData.length;
+      document.getElementById('factCount').textContent = factsData.length;
+
+      buildGraphData();
+      initGraph();
+      renderTopicList();
+    }
+
+    function buildGraphData() {
+      graphData.nodes = topicsData.map(topic => {
+        const color = getColor(topic.name);
+        const factCount = factsData.filter(f => f.topic_id === topic.id).length;
+        return {
+          id: topic.id,
+          label: topic.name,
+          size: Math.max(40, Math.min(60, 30 + factCount * 2)), // 根据事实数量调整大小
+          topicData: topic,
+          style: { fill: color.fill, stroke: color.stroke, shadowBlur: 10 }
+        };
+      });
+
+      graphData.edges = edgesData.map(edge => {
+        const color = getRelColor(edge.relation_type);
+        return {
+          source: edge.source_topic_id,
+          target: edge.target_topic_id,
+          label: edge.relation_type,
+          edgeData: edge,
+          style: { stroke: color, lineWidth: 1.5, endArrow: { path: G6.Arrow.triangle(6, 8, 4), fill: color } }
+        };
+      });
+    }
+
+    function initGraph() {
+      const container = document.getElementById('container');
+      graph = new G6.Graph({
+        container: 'container',
+        width: container.offsetWidth,
+        height: container.offsetHeight,
+        fitView: true,
+        fitViewPadding: 60,
+        animate: true,
+        // 力导向布局 - 让节点分布更均匀
+        layout: {
+          type: 'force',
+          preventOverlap: true,
+          nodeSpacing: 80,
+          linkDistance: 150,
+          nodeStrength: -200,
+          edgeStrength: 0.3,
+          collideStrength: 0.8,
+          alpha: 0.3,
+          alphaDecay: 0.02,
+          alphaMin: 0.01
+        },
+        defaultNode: {
+          type: 'circle',
+          labelCfg: {
+            position: 'bottom',
+            offset: 6,
+            style: { fill: '#e0e0e0', fontSize: 10, textAlign: 'center' }
+          },
+          style: { lineWidth: 2, opacity: 0.92 }
+        },
+        defaultEdge: {
+          size: 1.5,
+          color: '#4b5563',
+          labelCfg: {
+            autoRotate: true,
+            style: { fill: '#9ca3af', fontSize: 9, background: { fill: '#1e1e3f', padding: [2, 4, 2, 4], radius: 2 } }
+          }
+        },
+        modes: { default: ['drag-canvas', 'zoom-canvas', 'drag-node'] },
+        nodeStateStyles: {
+          hover: { lineWidth: 3, shadowBlur: 20 },
+          selected: { lineWidth: 4, shadowBlur: 25 },
+          matched: { lineWidth: 3, stroke: '#fbbf24', shadowColor: '#fbbf24', shadowBlur: 15 },
+          dimmed: { opacity: 0.2 }
+        },
+        edgeStateStyles: {
+          hover: { lineWidth: 2 },
+          matched: { lineWidth: 2.5, stroke: '#fbbf24' },
+          dimmed: { opacity: 0.1 }
+        }
+      });
+
+      graph.data(graphData);
+      graph.render();
+
+      graph.on('node:mouseenter', (e) => { if (!searchMode) graph.setItemState(e.item, 'hover', true); });
+      graph.on('node:mouseleave', (e) => { graph.setItemState(e.item, 'hover', false); });
+      graph.on('node:click', (e) => selectTopic(e.item.getModel().id));
+      graph.on('canvas:click', () => { if (!searchMode) deselectAll(); });
+
+      window.addEventListener('resize', () => {
+        graph.changeSize(container.offsetWidth, container.offsetHeight);
+        graph.fitView();
+      });
+    }
+
+    // ========== 搜索 ==========
+    function handleSearch(e) { if (e.key === 'Enter') doSearch(); if (e.key === 'Escape') clearSearch(); }
+
+    function doSearch() {
+      const query = document.getElementById('searchInput').value.trim().toLowerCase();
+      if (!query) return clearSearch();
+
+      const matchedTopicIds = new Set(), matchedFactIds = new Set(), matchedEdgeIds = new Set(), results = [];
+
+      topicsData.forEach(topic => {
+        if (topic.name?.toLowerCase().includes(query) || topic.alias?.toLowerCase().includes(query) || topic.description?.toLowerCase().includes(query)) {
+          matchedTopicIds.add(topic.id);
+          results.push({ type: 'topic', id: topic.id, title: topic.name, text: topic.description || '' });
+        }
+      });
+
+      factsData.forEach(fact => {
+        if (fact.content?.toLowerCase().includes(query)) {
+          matchedFactIds.add(fact.id);
+          matchedTopicIds.add(fact.topic_id);
+          const topic = topicsData.find(t => t.id === fact.topic_id);
+          results.push({ type: 'fact', id: fact.id, topicId: fact.topic_id, title: topic?.name || '', text: fact.content });
+        }
+      });
+
+      edgesData.forEach(edge => {
+        if (edge.relation_type?.toLowerCase().includes(query)) {
+          matchedEdgeIds.add(`${edge.source_topic_id}-${edge.target_topic_id}`);
+          matchedTopicIds.add(edge.source_topic_id);
+          matchedTopicIds.add(edge.target_topic_id);
+          const src = topicsData.find(t => t.id === edge.source_topic_id), tgt = topicsData.find(t => t.id === edge.target_topic_id);
+          results.push({ type: 'relation', id: `${edge.source_topic_id}-${edge.target_topic_id}`, title: `${src?.name} → ${edge.relation_type} → ${tgt?.name}`, text: '' });
+        }
+      });
+
+      showSearchResults(results, query);
+      highlightGraph(matchedTopicIds, matchedEdgeIds);
+    }
+
+    function showSearchResults(results, query) {
+      const container = document.getElementById('searchResults');
+      if (results.length === 0) {
+        container.innerHTML = '<div class="result-item"><div class="result-text">未找到结果</div></div>';
+        container.classList.add('show'); return;
+      }
+      const highlight = (text) => text ? text.replace(new RegExp(`(${query})`, 'gi'), '<span class="highlight">$1</span>') : '';
+      container.innerHTML = results.slice(0, 15).map(r => `
+        <div class="result-item" onclick="focusOnResult('${r.type}', '${r.id}', '${r.topicId || ''}')">
+          <span class="result-type">${r.type === 'topic' ? '主题' : r.type === 'fact' ? '事实' : '关系'}</span>
+          <div class="result-title">${highlight(r.title)}</div>
+          ${r.text ? `<div class="result-text">${highlight(r.text.slice(0, 120))}${r.text.length > 120 ? '...' : ''}</div>` : ''}
+        </div>`).join('');
+      container.classList.add('show');
+    }
+
+    function focusOnResult(type, id, topicId) {
+      const targetId = type === 'fact' ? topicId : id;
+      if (targetId) { selectTopic(targetId); const node = graph.findById(targetId); if (node) graph.focusItem(node, true, { duration: 400 }); }
+    }
+
+    function highlightGraph(matchedTopicIds, matchedEdgeIds) {
+      searchMode = true;
+      highlightedNodes = matchedTopicIds; highlightedEdges = matchedEdgeIds;
+      graph.getNodes().forEach(node => {
+        const id = node.getModel().id;
+        if (matchedTopicIds.has(id)) { graph.setItemState(node, 'matched', true); graph.setItemState(node, 'dimmed', false); }
+        else { graph.setItemState(node, 'matched', false); graph.setItemState(node, 'dimmed', true); }
+      });
+      graph.getEdges().forEach(edge => {
+        const model = edge.getModel(), edgeId = `${model.source}-${model.target}`;
+        if (matchedEdgeIds.has(edgeId)) { graph.setItemState(edge, 'matched', true); graph.setItemState(edge, 'dimmed', false); }
+        else { graph.setItemState(edge, 'matched', false); graph.setItemState(edge, 'dimmed', true); }
+      });
+      document.querySelectorAll('.topic-item').forEach(el => { el.classList.toggle('matched', matchedTopicIds.has(el.id.replace('topic-', ''))); });
+    }
+
+    function clearSearch() {
+      searchMode = false;
+      document.getElementById('searchInput').value = '';
+      document.getElementById('searchResults').classList.remove('show');
+      graph.getNodes().forEach(n => graph.clearItemStates(n));
+      graph.getEdges().forEach(e => graph.clearItemStates(e));
+      document.querySelectorAll('.topic-item').forEach(el => el.classList.remove('matched'));
+      highlightedNodes.clear(); highlightedEdges.clear();
+    }
+
+    // ========== 侧边栏 ==========
+    function renderTopicList() {
+      const list = document.getElementById('topicList');
+      list.innerHTML = topicsData.map(topic => {
+        const factCount = factsData.filter(f => f.topic_id === topic.id).length;
+        const outEdges = edgesData.filter(e => e.source_topic_id === topic.id || e.target_topic_id === topic.id).length;
+        return `<div class="topic-item" id="topic-${topic.id}" onclick="selectTopic('${topic.id}')">
+          <div class="topic-name">${topic.name}</div>
+          <div class="topic-meta">${factCount} facts · ${outEdges} relations</div>
+        </div>`;
+      }).join('');
+    }
+
+    // ========== 详情面板 ==========
+    function selectTopic(topicId) {
+      const topic = topicsData.find(t => t.id === topicId);
+      if (!topic) return;
+
+      document.querySelectorAll('.topic-item').forEach(el => el.classList.remove('active'));
+      document.getElementById('topic-' + topicId)?.classList.add('active');
+
+      graph.getNodes().forEach(n => graph.clearItemStates(n));
+      const node = graph.findById(topicId);
+      if (node) { graph.setItemState(node, 'selected', true); graph.focusItem(node, true, { duration: 300 }); }
+
+      const panel = document.getElementById('detailPanel');
+      panel.classList.add('show');
+      document.getElementById('detailTitle').textContent = topic.name;
+      document.getElementById('aliasText').textContent = topic.alias || '-';
+      document.getElementById('descText').textContent = topic.description || '暂无描述';
+
+      const topicFacts = factsData.filter(f => f.topic_id === topicId);
+      document.getElementById('factsList').innerHTML = topicFacts.slice(0, 5).map(f => 
+        `<div class="fact-item">${f.content.slice(0, 80)}${f.content.length > 80 ? '...' : ''}</div>`).join('') || '<div class="fact-item">暂无事实</div>';
+
+      const topicEdges = [
+        ...edgesData.filter(e => e.source_topic_id === topicId).map(e => ({ dir: 'out', rel: e.relation_type, name: topicsData.find(t => t.id === e.target_topic_id)?.name })),
+        ...edgesData.filter(e => e.target_topic_id === topicId).map(e => ({ dir: 'in', rel: e.relation_type, name: topicsData.find(t => t.id === e.source_topic_id)?.name }))
+      ];
+      document.getElementById('relationsList').innerHTML = topicEdges.map(e => {
+        const c = getRelColor(e.rel);
+        return `<span class="tag" style="background:${c}22;color:${c};border:1px solid ${c}44">${e.name} ${e.dir === 'out' ? '→' : '←'} ${e.rel}</span>`;
+      }).join('') || '<div class="fact-item">暂无关系</div>';
+    }
+
+    function deselectAll() {
+      document.querySelectorAll('.topic-item').forEach(el => el.classList.remove('active'));
+      document.getElementById('detailPanel').classList.remove('show');
+      graph.getNodes().forEach(n => graph.clearItemStates(n));
+    }
+
+    function fitView() { graph.fitView(); }
+    function toggleLabels() {
+      showLabels = !showLabels;
+      graph.getNodes().forEach(node => { graph.updateItem(node, { label: showLabels ? node.getModel().label : '' }); });
+    }
+    function togglePanel() {
+      const panel = document.getElementById('topicPanel');
+      panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+    }
+
+    loadData();
+  </script>
+</body>
+</html>
